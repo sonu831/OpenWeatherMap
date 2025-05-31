@@ -2,7 +2,6 @@ const express = require('express');
 const dotenv = require('dotenv');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./src/config/swagger');
-const logger = require('./src/middleware/logger');
 
 // Load environment variables
 dotenv.config();
@@ -16,7 +15,6 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(logger);
 
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
@@ -51,7 +49,7 @@ app.get('/', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(`[${new Date().toISOString()}] Error:`, err.stack);
+  console.error(err.stack);
   res.status(err.status || 500).json({
     error: {
       message: err.message || 'Internal Server Error',
@@ -62,6 +60,6 @@ app.use((err, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`[${new Date().toISOString()}] Server is running on port ${PORT}`);
-  console.log(`[${new Date().toISOString()}] API Documentation available at http://localhost:${PORT}/api-docs`);
+  console.log(`Server is running on port ${PORT}`);
+  console.log(`API Documentation available at http://localhost:${PORT}/api-docs`);
 }); 

@@ -1,6 +1,6 @@
 # Weather Service API
 
-A robust RESTful API service that provides real-time weather information using the OpenWeatherMap API. This service offers a clean, well-documented interface for retrieving weather data based on geographical coordinates.
+A clean and efficient RESTful API service that provides real-time weather information using the OpenWeatherMap API. This service offers a simple, well-documented interface for retrieving weather data based on geographical coordinates.
 
 ## 🌟 Features
 
@@ -163,12 +163,11 @@ The application includes comprehensive error handling and input validation. To t
 ## 📝 Future Enhancements
 
 Potential improvements for future versions:
-- Add caching to reduce API calls
-- Implement rate limiting
 - Add more weather data points
 - Support for weather forecasts
 - Add unit and integration tests
-- Implement logging system
+- Implement caching for better performance
+- Add request logging for monitoring
 
 ## 🤝 Contributing
 

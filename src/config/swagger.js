@@ -29,7 +29,8 @@ const options = {
                 latitude: { type: 'number', example: 40.7128 },
                 longitude: { type: 'number', example: -74.0060 },
                 city: { type: 'string', example: 'New York' },
-                country: { type: 'string', example: 'US' }
+                country: { type: 'string', example: 'US' },
+                state: { type: 'string', example: 'New York' }
               }
             },
             current: {

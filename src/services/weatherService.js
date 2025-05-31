@@ -4,27 +4,55 @@ const { getTemperatureCategory } = require('../utils/helpers');
 class WeatherService {
   constructor() {
     this.apiKey = process.env.OPENWEATHER_API_KEY;
-    this.baseUrl = 'https://api.openweathermap.org/data/2.5/weather';
-    this.cache = new Map();
-    this.cacheTimeout = 5 * 60 * 1000; // 5 minutes in milliseconds
+    this.weatherUrl = 'https://api.openweathermap.org/data/2.5/weather';
+    this.geoUrl = 'http://api.openweathermap.org/geo/1.0/reverse';
   }
 
   /**
-   * Get weather data from OpenWeatherMap API with caching
+   * Get location details using reverse geocoding
+   * @param {number} lat - Latitude
+   * @param {number} lon - Longitude
+   * @returns {Promise<Object>} Location data
+   */
+  async getLocationDetails(lat, lon) {
+    try {
+      const response = await axios.get(this.geoUrl, {
+        params: {
+          lat,
+          lon,
+          limit: 1,
+          appid: this.apiKey
+        }
+      });
+
+      if (response.data && response.data.length > 0) {
+        const location = response.data[0];
+        return {
+          city: location.name,
+          country: location.country,
+          state: location.state
+        };
+      }
+      return { city: 'Unknown', country: 'Unknown' };
+    } catch (error) {
+      console.error('Geocoding API Error:', error.message);
+      return { city: 'Unknown', country: 'Unknown' };
+    }
+  }
+
+  /**
+   * Get weather data from OpenWeatherMap API
    * @param {number} lat - Latitude
    * @param {number} lon - Longitude
    * @returns {Promise<Object>} Weather data
    */
   async getWeatherData(lat, lon) {
-    const cacheKey = `${lat},${lon}`;
-    const cachedData = this.getCachedData(cacheKey);
-
-    if (cachedData) {
-      return cachedData;
-    }
-
     try {
-      const response = await axios.get(this.baseUrl, {
+      // Get location details first
+      const locationDetails = await this.getLocationDetails(lat, lon);
+
+      // Get weather data
+      const response = await axios.get(this.weatherUrl, {
         params: {
           lat,
           lon,
@@ -33,13 +61,15 @@ class WeatherService {
         }
       });
 
-      const { main, weather, wind, sys, name } = response.data;
-      const weatherData = {
+      const { main, weather, wind } = response.data;
+
+      return {
         location: {
           latitude: parseFloat(lat),
           longitude: parseFloat(lon),
-          city: name,
-          country: sys.country
+          city: locationDetails.city,
+          country: locationDetails.country,
+          state: locationDetails.state
         },
         current: {
           condition: this.getWeatherCondition(weather[0].main),
@@ -59,46 +89,12 @@ class WeatherService {
           alerts: []
         }
       };
-
-      // Cache the data
-      this.cacheData(cacheKey, weatherData);
-      return weatherData;
     } catch (error) {
       if (error.response) {
         throw new Error(`OpenWeatherMap API Error: ${error.response.data.message}`);
       }
       throw new Error('Failed to fetch weather data');
     }
-  }
-
-  /**
-   * Get cached weather data if available and not expired
-   * @param {string} key - Cache key
-   * @returns {Object|null} Cached data or null
-   */
-  getCachedData(key) {
-    const cached = this.cache.get(key);
-    if (!cached) return null;
-
-    const now = Date.now();
-    if (now - cached.timestamp > this.cacheTimeout) {
-      this.cache.delete(key);
-      return null;
-    }
-
-    return cached.data;
-  }
-
-  /**
-   * Cache weather data with timestamp
-   * @param {string} key - Cache key
-   * @param {Object} data - Weather data to cache
-   */
-  cacheData(key, data) {
-    this.cache.set(key, {
-      data,
-      timestamp: Date.now()
-    });
   }
 
   /**
