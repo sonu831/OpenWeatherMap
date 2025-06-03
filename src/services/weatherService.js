@@ -13,6 +13,7 @@ class WeatherService {
    * @param {number} lat - Latitude
    * @param {number} lon - Longitude
    * @returns {Promise<Object>} Location data
+   * @throws {Error} If geocoding fails or no location found
    */
   async getLocationDetails(lat, lon) {
     try {
@@ -25,18 +26,21 @@ class WeatherService {
         }
       });
 
-      if (response.data && response.data.length > 0) {
-        const location = response.data[0];
-        return {
-          city: location.name,
-          country: location.country,
-          state: location.state
-        };
+      if (!response.data || response.data.length === 0) {
+        throw new Error('No location found for the given coordinates');
       }
-      return { city: 'Unknown', country: 'Unknown' };
+
+      const location = response.data[0];
+      return {
+        city: location.name,
+        country: location.country,
+        state: location.state
+      };
     } catch (error) {
-      console.error('Geocoding API Error:', error.message);
-      return { city: 'Unknown', country: 'Unknown' };
+      if (error.response) {
+        throw new Error(`Geocoding API Error: ${error.response.data.message}`);
+      }
+      throw new Error(`Failed to get location details: ${error.message}`);
     }
   }
 

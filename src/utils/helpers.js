@@ -1,3 +1,10 @@
+// Temperature thresholds and categories
+const HOT_TEMP_THRESHOLD = 25;
+const COLD_TEMP_THRESHOLD = 10;
+const TEMP_CATEGORY_HOT = 'hot';
+const TEMP_CATEGORY_COLD = 'cold';
+const TEMP_CATEGORY_MODERATE = 'moderate';
+
 /**
  * Validate latitude and longitude coordinates
  * @param {string|number} lat - Latitude
@@ -33,9 +40,9 @@ const validateCoordinates = (lat, lon) => {
  * @returns {string} Temperature category
  */
 const getTemperatureCategory = (tempCelsius) => {
-  if (tempCelsius >= 25) return 'hot';
-  if (tempCelsius <= 10) return 'cold';
-  return 'moderate';
+  if (tempCelsius >= HOT_TEMP_THRESHOLD) return TEMP_CATEGORY_HOT;
+  if (tempCelsius <= COLD_TEMP_THRESHOLD) return TEMP_CATEGORY_COLD;
+  return TEMP_CATEGORY_MODERATE;
 };
 
 module.exports = {
